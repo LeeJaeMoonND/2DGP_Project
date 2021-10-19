@@ -9,9 +9,15 @@ class Man():
         self.frame = 0
         self.direction=0
         self.p = (self.x, self.y) = (MAP_WIDTH/2,MAP_HEIGHT/2)
-        self.isMove = 0
         self.dirX = 0
         self.dirY = 0
+
+        # 아직 생각만 하고 있는 능력치
+        self.hp = 100
+        self.mp = 100
+        self.speed = 1
+        self.damage = 5
+
 
     def move(self, n):
         if n == 'MR':

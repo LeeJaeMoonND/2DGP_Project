@@ -49,7 +49,7 @@ def enter():
     open_canvas(MAP_WIDTH, MAP_HEIGHT)
     man = classMan.Man()
     rMon = [classMon.RMon() for i in range(random.randint(0, 5))]
-    tMon = [classMon.TMon() for i in range(random.randint(0, 5))]
+    tMon = [classMon.TMon() for i in range(random.randint(1, 1))]
     map1 = load_image('map1.png')
 
 
