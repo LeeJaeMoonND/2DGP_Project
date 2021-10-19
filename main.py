@@ -1,8 +1,7 @@
 from pico2d import *
 import random
 
-
-KPU_WIDTH, KPU_HEIGHT = 1280, 1024
+MAP_WIDTH, MAP_HEIGHT = 1175, 585
 
 # 주인공
 class Man():
@@ -10,7 +9,7 @@ class Man():
         self.image = load_image('man.png')
         self.frame = 0
         self.direction=0
-        self.p = (self.x, self.y) = (400, 400)
+        self.p = (self.x, self.y) = (MAP_WIDTH/2,MAP_HEIGHT/2)
         self.isMove = 0
         self.dirX = 0
         self.dirY = 0
@@ -58,18 +57,18 @@ class Man():
 # Random한 좌표를 지나는 몬스터
 class RMon():
     def __init__(self):
-        self.image = load_image('mon1.png')
+        self.image = load_image('mon3.png')
         self.frame = 0
-        self.direction = 8
-        self.p1 = [random.randint(0, 800), random.randint(0, 600)]
-        self.p2 = [random.randint(0, 800), random.randint(0, 600)]
-        self.p3 = [random.randint(0, 800), random.randint(0, 600)]
-        self.p4 = [random.randint(0, 800), random.randint(0, 600)]
+        self.direction = 2
+        self.p1 = [random.randint(100, MAP_WIDTH-100), random.randint(100, MAP_HEIGHT-100)]
+        self.p2 = [random.randint(100, MAP_WIDTH-100), random.randint(100, MAP_HEIGHT-100)]
+        self.p3 = [random.randint(100, MAP_WIDTH-100), random.randint(100, MAP_HEIGHT-100)]
+        self.p4 = [random.randint(100, MAP_WIDTH-100), random.randint(100, MAP_HEIGHT-100)]
         self.x, self.y = self.p2[0], self.p2[1]
         self.t = 0
 
     def draw(self):
-        self.image.clip_draw(self.frame*134, self.direction*135, 134, 135, self.x, self.y)
+        self.image.clip_draw(self.frame*94, self.direction*93, 94, 93, self.x, self.y)
 
     def move(self):
         self.x = ((-self.t**3 + 2*self.t**2 - self.t)*self.p1[0] + (
@@ -79,6 +78,10 @@ class RMon():
         self.y = ((-self.t**3 + 2*self.t**2 - self.t)*self.p1[1] + (
                 3*self.t**3 - 5*self.t**2 + 2)*self.p2[1] + (
                 -3*self.t**3 + 4*self.t**2 + self.t)*self.p3[1] + (self.t**3 - self.t**2)*self.p4[1])/2
+        if self.x > MAP_WIDTH-100:
+            self.x = MAP_WIDTH-100
+        if self.y > MAP_HEIGHT-100:
+            self.y = MAP_HEIGHT-100
 
         self.frame = (self.frame + 1) % 5
         self.t += 0.01
@@ -89,14 +92,14 @@ class RMon():
 #추적하는 몬스터
 class TMon():
     def __init__(self):
-        self.image = load_image('mon1.png')
+        self.image = load_image('mon2.png')
         self.frame = 0
         self.direction = 8
-        self.x, self.y = random.randint(0,800) , random.randint(0,600)
+        self.x, self.y = random.randint(0, 800), random.randint(0, 600)
         self.t = 0
 
     def draw(self):
-        self.image.clip_draw(self.frame*134, self.direction*135, 134, 135, self.x, self.y)
+        self.image.clip_draw(self.frame*67, self.direction*68, 67, 68, self.x, self.y)
 
     def move(self, Tx, Ty):
         self.t = (1000-abs(Tx-self.x))/50000
@@ -137,7 +140,8 @@ def handle_events():
                 man.move('SU')
 
 
-open_canvas()
+open_canvas(MAP_WIDTH, MAP_HEIGHT)
+map1 = load_image('map1.png')
 man = Man()
 Rmon1 = RMon()
 Rmon2 = RMon()
@@ -147,6 +151,7 @@ Tmon1 = TMon()
 while running:
 
     clear_canvas()
+    map1.draw(MAP_WIDTH//2,MAP_HEIGHT//2)
     man.draw()
     Rmon1.draw()
     Rmon2.draw()
@@ -158,4 +163,4 @@ while running:
     Rmon2.move()
     Tmon1.move(man.x, man.y)
 
-    delay(0.03)
+    delay(0.05)
