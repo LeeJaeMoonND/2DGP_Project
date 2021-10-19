@@ -30,6 +30,8 @@ def handle_events():
                 man.move('MD')
             elif event.key == SDLK_UP:
                 man.move('MU')
+            elif event.key == SDLK_z:
+                man.attack()
         elif event.type == SDL_KEYUP:
             if event.key == SDLK_RIGHT:
                 man.move('SR')
