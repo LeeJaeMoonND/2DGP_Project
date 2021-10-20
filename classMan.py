@@ -7,11 +7,17 @@ class Man():
     def __init__(self):
         self.image = load_image('man.png')
         self.frame = 0
+        # 움직임
         self.dir = 0
         self.direction=0
-        self.p = (self.x, self.y) = (MAP_WIDTH/2,MAP_HEIGHT/2)
+
+        # 좌표, 방향
         self.dirX = 0
         self.dirY = 0
+        self.p = (self.x, self.y) = (MAP_WIDTH / 2, MAP_HEIGHT / 2)
+
+        # 상태 체크
+        self.isRoll = False
         self.isMove = False
         self.is_attack = False
 
@@ -39,7 +45,7 @@ class Man():
             self.dirY -= self.speed
         elif n == 'SR':
             self.isMove = 0
-            self.dirX -= 1
+            self.dirX -= self.speed
         elif n == 'SL':
             self.isMove = 0
             self.dirX += self.speed
@@ -49,6 +55,11 @@ class Man():
         elif n == 'SD':
             self.isMove = 0
             self.dirY += self.speed
+    # 아직 미완성
+    # def rolling(self):
+    #     self.isRoll = True
+    #     self.frame = 0
+    #     self.speed = 5
 
     def attack(self):
         self.is_attack = True
@@ -75,8 +86,21 @@ class Man():
                 self.direction = 0
             elif self.dir == 1:
                 self.direction = 1
+        if self.frame == 7 and self.isRoll == True:
+            self.isRoll = False
+            self.speed = 1
+
         self.x += self.dirX*5
         self.y += self.dirY*5
+        1175, 585
+        if self.x< 100 :
+            self.x = 100
+        elif MAP_WIDTH-100<self.x :
+            self.x = MAP_WIDTH-100
+        if self.y < 150:
+            self.y = 150
+        elif MAP_HEIGHT+50<self.y:
+            self.y = MAP_HEIGHT+50
 
     def draw(self):
         self.image.clip_draw(self.frame*160, self.direction*109, 160, 109, self.x, self.y)

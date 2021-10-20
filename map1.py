@@ -48,6 +48,9 @@ def handle_events():
                 man.move('MU')
             elif event.key == SDLK_z:
                 man.attack()
+            # 구르기 미완성
+            # elif event.key == SDLK_a:
+            #     man.rolling()
         elif event.type == SDL_KEYUP:
             if event.key == SDLK_RIGHT:
                 man.move('SR')
