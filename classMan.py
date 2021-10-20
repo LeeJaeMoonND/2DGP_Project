@@ -12,6 +12,7 @@ class Man():
         self.p = (self.x, self.y) = (MAP_WIDTH/2,MAP_HEIGHT/2)
         self.dirX = 0
         self.dirY = 0
+        self.isMove = False
         self.is_attack = False
 
         # 아직 생각만 하고 있는 능력치
@@ -24,33 +25,34 @@ class Man():
     def move(self, n):
         if n == 'MR':
             self.isMove = 1
-            self.dirX += 1
+            self.dirX += self.speed
             self.direction = 0
         elif n == 'ML':
             self.isMove = 1
-            self.dirX -= 1
+            self.dirX -= self.speed
             self.direction = 1
         elif n == 'MU':
             self.isMove = 1
-            self.dirY += 1
+            self.dirY += self.speed
         elif n == 'MD':
             self.isMove = 1
-            self.dirY -= 1
+            self.dirY -= self.speed
         elif n == 'SR':
             self.isMove = 0
             self.dirX -= 1
         elif n == 'SL':
             self.isMove = 0
-            self.dirX += 1
+            self.dirX += self.speed
         elif n == 'SU':
             self.isMove = 0
-            self.dirY -= 1
+            self.dirY -= self.speed
         elif n == 'SD':
             self.isMove = 0
-            self.dirY += 1
+            self.dirY += self.speed
 
     def attack(self):
-        self.is_attack=True
+        self.is_attack = True
+        self.isMove=True
         if self.direction == 1 :
             #시트를 바꾸면 새로 짤 예정
             self.dir = 1
@@ -62,9 +64,13 @@ class Man():
             self.direction = 3
 
     def location(self):
-        self.frame = (self.frame + 1) % 8
+        if(self.isMove == True):
+            self.frame = (self.frame + 1) % 8
+        else :
+            self.frame = 7
         if self.frame == 7 and self.is_attack == True:
             self.is_attack = False
+            self.isMove = False
             if self.dir == 0:
                 self.direction = 0
             elif self.dir == 1:
