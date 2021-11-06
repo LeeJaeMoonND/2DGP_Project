@@ -3,7 +3,7 @@ import random
 
 MAP_WIDTH, MAP_HEIGHT = 1175, 585
 
-RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP = range(8)
+RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, PRESS_A, TIME_OUT = range(10)
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
     (SDL_KEYDOWN, SDLK_LEFT): LEFT_DOWN,
@@ -12,7 +12,8 @@ key_event_table = {
     (SDL_KEYUP, SDLK_RIGHT): RIGHT_UP,
     (SDL_KEYUP, SDLK_LEFT): LEFT_UP,
     (SDL_KEYUP, SDLK_UP): UP_UP,
-    (SDL_KEYUP, SDLK_DOWN) : DOWN_UP
+    (SDL_KEYUP, SDLK_DOWN) : DOWN_UP,
+    (SDL_KEYDOWN, SDLK_a): PRESS_A
 }
 
 
@@ -43,17 +44,19 @@ class IdleState:
             Man.velocityY += 1
             Man.direction = 1
 
-        Man.timer = 1000
-    def exit(boy, event):
+    def exit(Man, event):
         pass
+
     def do(Man):
         Man.frame = (Man.frame + 1) % 8
-        Man.timer -= 1
+
     def draw(Man):
         Man.image = load_image('Will_Idle35.35.png')
         Man.image.clip_draw(Man.frame * 70, Man.direction * 70, 70, 70, Man.x, Man.y)
 
+
 class RunState:
+
     def enter(Man, event):
         if event == RIGHT_DOWN:
             Man.velocityX += 1
@@ -79,7 +82,33 @@ class RunState:
         elif event == DOWN_UP:
             Man.velocityY += 1
             Man.direction = 1
-        Man.timer = 1000
+
+    def exit(boy, event):
+        pass
+
+    def do(Man):
+        Man.frame = (Man.frame + 1) % 8
+        Man.x += Man.velocityX * 5
+        Man.y += Man.velocityY * 5
+
+    def draw(Man):
+        Man.image = load_image('will animation cycle35.35.png')
+        Man.image.clip_draw(Man.frame * 70, Man.direction * 70, 70, 70, Man.x, Man.y)
+
+
+class RollState:
+
+    def enter(Man, event):
+        Man.frame = 0
+        if Man.direction == 3:
+            Man.velocityX = 1
+        elif Man.direction == 2:
+            Man.velocityX = -1
+        elif Man.direction == 0:
+            Man.velocityY = 1
+        elif Man.direction == 1:
+            Man.velocityY = -1
+        Man.timer = 8
 
     def exit(boy, event):
         pass
@@ -87,20 +116,24 @@ class RunState:
     def do(Man):
         Man.frame = (Man.frame + 1) % 8
         Man.timer -= 1
-        Man.x += Man.velocityX
-        Man.y += Man.velocityY
-        Man.x = clamp(25, Man.x, 800 - 25)
-        Man.y = clamp(25, Man.y, 800 - 25)
-    def draw(Man):
+        Man.x += Man.velocityX*10
+        Man.y += Man.velocityY*10
+        if Man.timer == 0:
+            Man.add_event(TIME_OUT)
 
-        Man.image = load_image('will animation cycle35.35.png')
+    def draw(Man):
+        Man.image = load_image('Will_Roll35.35.png')
         Man.image.clip_draw(Man.frame * 70, Man.direction * 70, 70, 70, Man.x, Man.y)
 
 next_state_table = {
+
     IdleState: {RIGHT_UP: RunState, LEFT_UP: RunState, UP_UP:RunState,DOWN_UP:RunState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState},
+    ##PRESS_A:rollState
     RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
-    RIGHT_DOWN: IdleState, LEFT_DOWN: IdleState,UP_DOWN:IdleState,DOWN_DOWN:IdleState},
+    RIGHT_DOWN: IdleState, LEFT_DOWN: IdleState,UP_DOWN:IdleState,DOWN_DOWN:IdleState,
+    PRESS_A:RollState},
+    RollState:{TIME_OUT:RunState, PRESS_A:RollState}
 }
 
 
@@ -110,7 +143,7 @@ class Man():
         self.frame = 0
         # 움직임
         self.dir = 0
-        self.direction=0
+        self.direction = 0
 
         # 좌표, 방향
         self.velocityX = 0
