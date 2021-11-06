@@ -1,7 +1,6 @@
 from pico2d import *
 import game_framework
 import random
-import start_state
 import classMan
 import classMon
 
@@ -29,44 +28,21 @@ def exit():
     del(map1)
 
 def handle_events():
-    global man
-
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
             game_framework.quit()
-        elif event.type == SDL_KEYDOWN :
-            if event.key == SDLK_ESCAPE:
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
                 game_framework.quit()
-            elif event.key == SDLK_RIGHT:
-                man.move('MR')
-            elif event.key == SDLK_LEFT:
-                man.move('ML')
-            elif event.key == SDLK_DOWN:
-                man.move('MD')
-            elif event.key == SDLK_UP:
-                man.move('MU')
-            elif event.key == SDLK_z:
-                man.attack()
-
-        elif event.type == SDL_KEYUP:
-            if event.key == SDLK_RIGHT:
-                man.move('SR')
-            elif event.key == SDLK_LEFT:
-                man.move('SL')
-            elif event.key == SDLK_DOWN:
-                man.move('SD')
-            elif event.key == SDLK_UP:
-                man.move('SU')
-            elif event.key == SDLK_a:
-                man.rolling()
+        else:
+            man.handle_event(event)
 def update():
     global rMon, tMon, man
     for RMon in rMon:
         RMon.move()
     for TMon in tMon:
         TMon.move(man.x, man.y)
-    man.location()
+    man.update()
 
 def draw():
     clear_canvas()
