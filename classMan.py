@@ -15,7 +15,7 @@ FRAMES_PER_ACTION = 8
 
 MAP_WIDTH, MAP_HEIGHT = 1175, 585
 
-RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN,A_UP, TIME_OUT = range(11)
+RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN, A_UP, Z_DOWN, Z_UP, TIME_OUT = range(13)
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
     (SDL_KEYDOWN, SDLK_LEFT): LEFT_DOWN,
@@ -26,7 +26,9 @@ key_event_table = {
     (SDL_KEYUP, SDLK_UP): UP_UP,
     (SDL_KEYUP, SDLK_DOWN) : DOWN_UP,
     (SDL_KEYDOWN, SDLK_a): A_DOWN,
-    (SDL_KEYUP, SDLK_a): A_UP
+    (SDL_KEYUP, SDLK_a): A_UP,
+    (SDL_KEYDOWN, SDLK_z): Z_DOWN,
+    (SDL_KEYUP, SDLK_z): Z_UP
 }
 
 
@@ -64,7 +66,7 @@ class IdleState:
         Man.frame = (Man.frame + 1) % 8
 
     def draw(Man):
-        Man.image = load_image('Will_Idle35.35.png')
+        Man.image = load_image('will/Will_Idle35.35.png')
         Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 70, 70, 70, int(Man.x), int(Man.y))
 
 class RunState:
@@ -104,15 +106,16 @@ class RunState:
         Man.y += Man.velocityY * game_framework.frame_time
 
     def draw(Man):
-        Man.image = load_image('will animation cycle35.35.png')
+        Man.image = load_image('will/will animation cycle35.35.png')
         Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 70, 70, 70, int(Man.x), int(Man.y))
 
 
 class RollState:
 
     def enter(Man, event):
-        Man.frame = 0
-        Man.timer = 8
+        if event == A_DOWN:
+            Man.frame = 0
+            Man.timer = 8
 
     def exit(boy, event):
         pass
@@ -126,26 +129,50 @@ class RollState:
             Man.add_event(TIME_OUT)
 
     def draw(Man):
-        Man.image = load_image('Will_Roll35.35.png')
+        Man.image = load_image('will/Will_Roll35.35.png')
         Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 70, 70, 70, int(Man.x), int(Man.y))
 
+class AttackState:
+    def enter(Man, event):
+        if event == Z_DOWN:
+            Man.frame = 0
+            Man.timer = 8
+
+    def exit(Man, event):
+        pass
+
+    def do(Man):
+        Man.timer -= 1
+        Man.frame = (Man.frame + 1) % 8
+        if Man.timer == 0:
+            Man.add_event(TIME_OUT)
+
+    def draw(Man):
+        Man.image = load_image('will/will_attack.png')
+        Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 110, 70, 110, int(Man.x), int(Man.y))
+
 next_state_table = {
-    IdleState: {RIGHT_UP: RunState, LEFT_UP: RunState, UP_UP:RunState,DOWN_UP:RunState,
+    IdleState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,
-    A_DOWN:RollState, A_UP:IdleState},
+    A_DOWN:RollState, A_UP:IdleState, Z_DOWN: AttackState, Z_UP: IdleState},
 
-    RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
-    RIGHT_DOWN: IdleState, LEFT_DOWN: IdleState,UP_DOWN:IdleState,DOWN_DOWN:IdleState,
-    A_DOWN:RollState, A_UP:RunState},
+    RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState, DOWN_UP: IdleState,
+    RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN: RunState, DOWN_DOWN: RunState,
+    A_DOWN: RollState, A_UP: RunState, Z_DOWN: AttackState, Z_UP: IdleState},
 
-    RollState:{RIGHT_UP: RunState, LEFT_UP: RunState, UP_UP:RunState,DOWN_UP:RunState,
-    RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,TIME_OUT:RunState, A_DOWN:RollState, A_UP: RunState}
+    RollState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
+    RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,TIME_OUT:RunState,
+    A_DOWN:RollState, A_UP: RollState},
+
+    AttackState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP: IdleState,DOWN_UP: IdleState,
+    RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN:RunState, DOWN_DOWN:RunState, TIME_OUT: RunState,
+    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState}
 }
 
 
 class Man():
     def __init__(self):
-        self.image = load_image('will animation cycle35.35.png')
+        self.image = load_image('will/will animation cycle35.35.png')
         self.frame = 0
         # 움직임
         self.dir = 0
@@ -164,11 +191,9 @@ class Man():
         # 아직 생각만 하고 있는 능력치
         self.hp = 100
         self.mp = 100
-        self.speed = 1
         self.damage = 5
 
     def change_state(self, state):
-        # fill here
         pass
 
     def add_event(self, event):
