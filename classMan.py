@@ -1,9 +1,21 @@
 from pico2d import *
+import game_framework
 import random
+
+PIXEL_PER_METER = (10.0 / 0.2) # 10 pixel 20 cm
+RUN_SPEED_KMPH = 10.0 # Km / Hour
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
+TIME_PER_ACTION = 0.5
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+FRAMES_PER_ACTION = 8
+
 
 MAP_WIDTH, MAP_HEIGHT = 1175, 585
 
-RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, PRESS_A, TIME_OUT = range(10)
+RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN,A_UP, TIME_OUT = range(11)
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
     (SDL_KEYDOWN, SDLK_LEFT): LEFT_DOWN,
@@ -13,35 +25,36 @@ key_event_table = {
     (SDL_KEYUP, SDLK_LEFT): LEFT_UP,
     (SDL_KEYUP, SDLK_UP): UP_UP,
     (SDL_KEYUP, SDLK_DOWN) : DOWN_UP,
-    (SDL_KEYDOWN, SDLK_a): PRESS_A
+    (SDL_KEYDOWN, SDLK_a): A_DOWN,
+    (SDL_KEYUP, SDLK_a): A_UP
 }
 
 
 class IdleState:
     def enter(Man, event):
         if event == RIGHT_DOWN:
-            Man.velocityX += 1
+            Man.velocityX += RUN_SPEED_PPS
             Man.direction = 3
         elif event == LEFT_DOWN:
-            Man.velocityX -= 1
+            Man.velocityX -= RUN_SPEED_PPS
             Man.direction = 2
         elif event == UP_DOWN:
-            Man.velocityY += 1
+            Man.velocityY += RUN_SPEED_PPS
             Man.direction = 0
         elif event == DOWN_DOWN:
-            Man.velocityY -= 1
+            Man.velocityY -= RUN_SPEED_PPS
             Man.direction = 1
         elif event == RIGHT_UP:
-            Man.velocityX -= 1
+            Man.velocityX -= RUN_SPEED_PPS
             Man.direction = 3
         elif event == LEFT_UP:
-            Man.velocityX += 1
+            Man.velocityX += RUN_SPEED_PPS
             Man.direction = 2
         elif event == UP_UP:
-            Man.velocityY -= 1
+            Man.velocityY -= RUN_SPEED_PPS
             Man.direction = 0
         elif event == DOWN_UP:
-            Man.velocityY += 1
+            Man.velocityY += RUN_SPEED_PPS
             Man.direction = 1
 
     def exit(Man, event):
@@ -52,62 +65,53 @@ class IdleState:
 
     def draw(Man):
         Man.image = load_image('Will_Idle35.35.png')
-        Man.image.clip_draw(Man.frame * 70, Man.direction * 70, 70, 70, Man.x, Man.y)
-
+        Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 70, 70, 70, int(Man.x), int(Man.y))
 
 class RunState:
 
     def enter(Man, event):
         if event == RIGHT_DOWN:
-            Man.velocityX += 1
+            Man.velocityX += RUN_SPEED_PPS
             Man.direction = 3
         elif event == LEFT_DOWN:
-            Man.velocityX -= 1
+            Man.velocityX -= RUN_SPEED_PPS
             Man.direction = 2
         elif event == UP_DOWN:
-            Man.velocityY += 1
+            Man.velocityY += RUN_SPEED_PPS
             Man.direction = 0
         elif event == DOWN_DOWN:
-            Man.velocityY -= 1
+            Man.velocityY -= RUN_SPEED_PPS
             Man.direction = 1
         elif event == RIGHT_UP:
-            Man.velocityX -= 1
+            Man.velocityX -= RUN_SPEED_PPS
             Man.direction = 3
         elif event == LEFT_UP:
-            Man.velocityX += 1
+            Man.velocityX += RUN_SPEED_PPS
             Man.direction = 2
         elif event == UP_UP:
-            Man.velocityY -= 1
+            Man.velocityY -= RUN_SPEED_PPS
             Man.direction = 0
         elif event == DOWN_UP:
-            Man.velocityY += 1
+            Man.velocityY += RUN_SPEED_PPS
             Man.direction = 1
 
     def exit(boy, event):
         pass
 
     def do(Man):
-        Man.frame = (Man.frame + 1) % 8
-        Man.x += Man.velocityX * 5
-        Man.y += Man.velocityY * 5
+        Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
+        Man.x += Man.velocityX * game_framework.frame_time
+        Man.y += Man.velocityY * game_framework.frame_time
 
     def draw(Man):
         Man.image = load_image('will animation cycle35.35.png')
-        Man.image.clip_draw(Man.frame * 70, Man.direction * 70, 70, 70, Man.x, Man.y)
+        Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 70, 70, 70, int(Man.x), int(Man.y))
 
 
 class RollState:
 
     def enter(Man, event):
         Man.frame = 0
-        if Man.direction == 3:
-            Man.velocityX = 1
-        elif Man.direction == 2:
-            Man.velocityX = -1
-        elif Man.direction == 0:
-            Man.velocityY = 1
-        elif Man.direction == 1:
-            Man.velocityY = -1
         Man.timer = 8
 
     def exit(boy, event):
@@ -116,24 +120,26 @@ class RollState:
     def do(Man):
         Man.frame = (Man.frame + 1) % 8
         Man.timer -= 1
-        Man.x += Man.velocityX*10
-        Man.y += Man.velocityY*10
+        Man.x += Man.velocityX * game_framework.frame_time * 1.5
+        Man.y += Man.velocityY * game_framework.frame_time * 1.5
         if Man.timer == 0:
             Man.add_event(TIME_OUT)
 
     def draw(Man):
         Man.image = load_image('Will_Roll35.35.png')
-        Man.image.clip_draw(Man.frame * 70, Man.direction * 70, 70, 70, Man.x, Man.y)
+        Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 70, 70, 70, int(Man.x), int(Man.y))
 
 next_state_table = {
-
     IdleState: {RIGHT_UP: RunState, LEFT_UP: RunState, UP_UP:RunState,DOWN_UP:RunState,
-    RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState},
-    ##PRESS_A:rollState
+    RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,
+    A_DOWN:RollState, A_UP:IdleState},
+
     RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
     RIGHT_DOWN: IdleState, LEFT_DOWN: IdleState,UP_DOWN:IdleState,DOWN_DOWN:IdleState,
-    PRESS_A:RollState},
-    RollState:{TIME_OUT:RunState, PRESS_A:RollState}
+    A_DOWN:RollState, A_UP:RunState},
+
+    RollState:{RIGHT_UP: RunState, LEFT_UP: RunState, UP_UP:RunState,DOWN_UP:RunState,
+    RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,TIME_OUT:RunState, A_DOWN:RollState, A_UP: RunState}
 }
 
 
