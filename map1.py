@@ -3,6 +3,7 @@ import game_framework
 import random
 import classMan
 import classMon
+import door
 
 MAP_WIDTH, MAP_HEIGHT = 1276, 717
 
@@ -10,12 +11,14 @@ rMon = None
 tMon = None
 man = None
 map1 = None
+Door = None
 
 def enter():
-    global rMon, tMon, man, map1
+    global rMon, tMon, man, map1, Door
     global MAP_HEIGHT, MAP_HEIGHT
     open_canvas(MAP_WIDTH, MAP_HEIGHT)
     man = classMan.Man()
+    Door = door.door()
     rMon = [classMon.RMon() for i in range(random.randint(0, 5))]
     tMon = [classMon.TMon() for i in range(random.randint(1, 1))]
     map1 = load_image('map1.png')
@@ -37,7 +40,7 @@ def handle_events():
         else:
             man.handle_event(event)
 def update():
-    global rMon, tMon, man
+    global rMon, tMon, man, Door
     for RMon in rMon:
         RMon.move()
     for TMon in tMon:
@@ -48,6 +51,7 @@ def draw():
     clear_canvas()
     map1.draw(MAP_WIDTH//2, MAP_HEIGHT//2)
     man.draw()
+    Door.draw()
     for RMon in rMon:
         RMon.draw()
     for TMon in tMon:
