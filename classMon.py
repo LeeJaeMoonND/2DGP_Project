@@ -46,21 +46,29 @@ class RMon():
 #추적하는 몬스터
 class TMon():
     def __init__(self):
-        self.image = load_image('Monster/Golem/_Golem-idle.png')
+        self.image = load_image('Monster/Golem/golem-attack1.png')
         self.frame = 0
         self.direction = 3
         self.x, self.y = random.randint(0, 800), random.randint(0, 600)
         self.t = 0
+        self.sizex = 100
+        self.sizey = 80
 
     def draw(self):
-        self.image.clip_draw(self.frame*70, self.direction*110, 70, 110, self.x, self.y)
+        self.image.clip_draw(self.sizex *self.frame, 0 *self.sizey, self.sizex, self.sizey, self.x, self.y)
 
     def move(self, Tx, Ty):
         if abs(Tx-self.x)>abs(Ty-self.y):
             if Tx > self.x :
                 self.direction = 3
+                self.image = load_image('Monster/Golem/_Golem-idle.png')
+                self.sizex = 70
+                self.sizey = 110
             else :
                 self.direction = 2
+                self.image = load_image('Monster/Golem/golem-attack1.png')
+                self.sizex = 100
+                self.sizey = 80
         else :
             if Ty > self.y:
                 self.direction = 0
