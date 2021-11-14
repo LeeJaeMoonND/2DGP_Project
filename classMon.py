@@ -7,9 +7,9 @@ MAP_WIDTH, MAP_HEIGHT = 1175, 585
 # Random한 좌표를 지나는 몬스터
 class RMon():
     def __init__(self):
-        self.image = load_image('mon2.png')
+        self.image = load_image('Monster/slime/slime.png')
         self.frame = 0
-        self.direction = 2
+        self.direction = 0
         self.p1 = [random.randint(100, MAP_WIDTH-100), random.randint(100, MAP_HEIGHT-100)]
         self.p2 = [random.randint(100, MAP_WIDTH-100), random.randint(100, MAP_HEIGHT-100)]
         self.p3 = [random.randint(100, MAP_WIDTH-100), random.randint(100, MAP_HEIGHT-100)]
@@ -18,7 +18,7 @@ class RMon():
         self.t = 0
 
     def draw(self):
-        self.image.clip_draw(self.frame*94, self.direction*93, 94, 93, self.x, self.y)
+        self.image.clip_draw(self.frame*50, self.direction*50, 50, 50, self.x, self.y)
 
     def move(self):
         self.x = ((-self.t**3 + 2*self.t**2 - self.t)*self.p1[0] + (
