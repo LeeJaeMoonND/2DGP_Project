@@ -16,6 +16,8 @@ FRAMES_PER_ACTION = 8
 MAP_WIDTH, MAP_HEIGHT = 1175, 585
 
 RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN, A_UP, Z_DOWN, Z_UP, TIME_OUT = range(13)
+error = ['RIGHT_DOWN', 'LEFT_DOWN', 'UP_DOWN', 'DOWN_DOWN', 'RIGHT_UP', 'LEFT_UP', 'UP_UP', 'DOWN_UP', 'A_DOWN', 'A_UP', 'Z_DOWN', 'Z_UP', 'TIME_OUT']
+
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
     (SDL_KEYDOWN, SDLK_LEFT): LEFT_DOWN,
@@ -63,7 +65,7 @@ class IdleState:
         pass
 
     def do(Man):
-        Man.frame = (Man.frame + 1) % 8
+        Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
 
     def draw(Man):
         Man.image = load_image('will/Will_Idle35.35.png')
@@ -104,6 +106,9 @@ class RunState:
         Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
         Man.x += Man.velocityX * game_framework.frame_time
         Man.y += Man.velocityY * game_framework.frame_time
+        Man.x = clamp(150, Man.x, 1130)
+        Man.y = clamp(100, Man.y, 635)
+
 
     def draw(Man):
         Man.image = load_image('will/will animation cycle35.35.png')
@@ -121,12 +126,15 @@ class RollState:
         pass
 
     def do(Man):
-        Man.frame = (Man.frame + 1) % 8
+        Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
         Man.timer -= 1
         Man.x += Man.velocityX * game_framework.frame_time * 1.5
         Man.y += Man.velocityY * game_framework.frame_time * 1.5
         if Man.timer == 0:
             Man.add_event(TIME_OUT)
+        Man.x = clamp(150, Man.x, 1130)
+        Man.y = clamp(100, Man.y, 635)
+
 
     def draw(Man):
         Man.image = load_image('will/Will_Roll35.35.png')
@@ -143,7 +151,7 @@ class AttackState:
 
     def do(Man):
         Man.timer -= 1
-        Man.frame = (Man.frame + 1) % 8
+        Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
         if Man.timer == 0:
             Man.add_event(TIME_OUT)
 
@@ -158,11 +166,11 @@ next_state_table = {
 
     RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState, DOWN_UP: IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN: RunState, DOWN_DOWN: RunState,
-    A_DOWN: RollState, A_UP: RunState, Z_DOWN: AttackState, Z_UP: IdleState},
+    A_DOWN: RollState, A_UP: RunState, Z_DOWN: AttackState, Z_UP: IdleState,TIME_OUT: RunState},
 
     RollState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,TIME_OUT:RunState,
-    A_DOWN:RollState, A_UP: RollState},
+    A_DOWN:RollState, A_UP: RollState, Z_DOWN:RollState, Z_UP:RollState},
 
     AttackState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP: IdleState,DOWN_UP: IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN:RunState, DOWN_DOWN:RunState, TIME_OUT: RunState,
@@ -187,6 +195,7 @@ class Man():
         self.cur_state = IdleState
         self.cur_state.enter(self, None)
 
+        self.font=load_font('ENCR10B.TTF',16)
 
         # 아직 생각만 하고 있는 능력치
         self.hp = 100
@@ -203,13 +212,18 @@ class Man():
         self.cur_state.do(self)
         if len(self.event_que) > 0:
             event = self.event_que.pop()
-            self.cur_state.exit(self, event)
-            self.cur_state = next_state_table[self.cur_state][event]
-            self.cur_state.enter(self, event)
+            try:
+                self.cur_state.exit(self, event)
+                self.cur_state = next_state_table[self.cur_state][event]
+                self.cur_state.enter(self, event)
+            except:
+                print(self.cur_state, error[event])
 
     def draw(self):
         self.cur_state.draw(self)
         debug_print('Velocity: ' + str(self.velocityX) + ' Dir:' + str(self.dir))
+        self.font.draw(self.x - 30, self.y + 65, 'HP: %d' %self.hp,(255, 255, 0))
+        self.font.draw(self.x - 30, self.y + 50, 'MP: %d' %self.mp,(255, 255, 0))
 
     def handle_event(self, event):
         if (event.type, event.key) in key_event_table:

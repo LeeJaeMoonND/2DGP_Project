@@ -44,7 +44,20 @@ class RMon():
             self.p1, self.p2, self.p3, self.p4 = self.p2, self.p3, self.p4, [random.randint(0, 800), random.randint(0, 600)]
             self.t = 0
 
-#추적하는 몬스터
+class IdleState:
+    def enter(TMon, event):
+        pass
+
+    def exit(TMon, event):
+        pass
+
+    def do(TMon):
+        pass
+
+    def draw(TMon):
+        TMon.image = load_image('Monster/Golem/_Golem-idle.png')
+
+
 class TMon():
     def __init__(self):
         self.image = load_image('Monster/Golem/golem-attack1.png')
