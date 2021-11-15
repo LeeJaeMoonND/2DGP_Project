@@ -2,6 +2,9 @@ from pico2d import *
 import game_framework
 
 OPEN, CLOSE = range(2)
+MAP_WIDTH, MAP_HEIGHT = 1276, 717
+WALL_L, WALL_R = 150, 1130
+WALL_U, WALL_D = 635, 85
 
 
 
@@ -12,16 +15,18 @@ class OpenState:
     def exit(door, event):
         pass
 
-    def do(doorz):
+    def do(door):
+        print(door.time)
         if door.time == 0:
             door.add_event(CLOSE)
+            door.time = 10
         door.time -= 1
 
 
 
     def draw(door):
         door.image = load_image('door/golem_basic_doors10.png')
-        door.image.draw(door.x, door.y,82,52)
+        door.image.draw(door.x, door.y, 142, 90)
 
 class CloseState:
     def enter(door, event):
@@ -31,13 +36,15 @@ class CloseState:
         pass
 
     def do(door):
+        print(door.time)
         if door.time == 0:
             door.add_event(OPEN)
+            door.time = 10
         door.time -= 1
 
     def draw(door):
         door.image = load_image('door/golem_basic_doors1.png')
-        door.image.draw(door.x, door.y, 82, 52)
+        door.image.draw(door.x, door.y, 142, 90)
 
 
 next_state_table = {
@@ -49,7 +56,7 @@ next_state_table = {
 class door():
     def __init__(self):
         self.image = load_image('door/golem_basic_doors1.png')
-        self.p = (self.x, self.y) = 800, 500
+        self.p = (self.x, self.y) = MAP_WIDTH//2, WALL_U+38
         self.time = 100
 
         self.event_que = []

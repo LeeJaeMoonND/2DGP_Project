@@ -2,7 +2,8 @@ from pico2d import *
 import random
 import classMan
 
-MAP_WIDTH, MAP_HEIGHT = 1175, 585
+MAP_WIDTH, MAP_HEIGHT = 1270, 717
+
 
 # Random한 좌표를 지나는 몬스터
 class RMon():

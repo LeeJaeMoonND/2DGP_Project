@@ -6,6 +6,8 @@ import classMon
 import door
 
 MAP_WIDTH, MAP_HEIGHT = 1276, 717
+WALL_L, WALL_R = 150, 1130
+WALL_U, WALL_D = 635, 85
 
 rMon = None
 tMon = None
@@ -39,6 +41,7 @@ def handle_events():
                 game_framework.quit()
         else:
             man.handle_event(event)
+
 def update():
     global rMon, tMon, man, Door
     for RMon in rMon:
@@ -46,6 +49,7 @@ def update():
     for TMon in tMon:
         TMon.move(man.x, man.y)
     man.update()
+    Door.update()
 
 def draw():
     clear_canvas()
