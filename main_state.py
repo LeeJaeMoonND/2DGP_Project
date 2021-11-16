@@ -20,26 +20,31 @@ slime = None
 golem = None
 man = None
 map1 =  None
-Door = None
+uDoor, dDoor, lDoor, rDoor = None, None, None, None
 
-map_logic = [[1, 1, 0],
-             [0, 1, 0],
-             [0, 1, 1]]
+map_logic = [[0, 0, 0, 0, 0],
+             [0, 1, 1, 1, 0],
+             [0, 1, 0, 0, 0],
+             [0, 1, 1, 0, 0],
+             [0, 0, 0, 0, 0]]
+
 SNum = [[0, 0, 0],
         [0, 0, 0],
         [0, 0, 0]]
+
 GNum = [[0, 0, 0],
         [0, 0, 0],
         [0, 0, 0]]
 
-for i in range(0,3):
-    for j in range(0,3):
+for i in range(1,5):
+    for j in range(1,5):
         if map_logic[j][i]==1:
-            SNum[j][i] = random.randint(1, 5)
-            GNum[j][i] = random.randint(1, 5)
+            SNum[j-1][i-1] = random.randint(1, 5)
+            GNum[j-1][i-1] = random.randint(1, 5)
 print(SNum)
+print(GNum)
 
-localX, localY = 1, 1
+localX, localY = 1, 3
 
 def collide(a, b):
     left_a, bottom_a, right_a, top_a = a.get_bb()
@@ -53,18 +58,32 @@ def collide(a, b):
 
 def enter():
     global map_logic, SNum, GNum
-    global slime, golem, man, map1, Door
+    global slime, golem, man, map1, uDoor, dDoor, lDoor, rDoor
     global MAP_HEIGHT, MAP_HEIGHT
     global localX, localY
     open_canvas(MAP_WIDTH, MAP_HEIGHT)
 
     map1 = Map.Map()
     man = Man.Man()
-    Door = door.door()
-    slime = [Slime.slime() for i in range(SNum[localY][localX])]
-    golem = [Golem.Golem() for i in range(GNum[localY][localX])]
+
+    uDoor = door.door('up')
+    dDoor = door.door('down')
+    lDoor = door.door('left')
+    rDoor = door.door('right')
+
+    if map_logic[localY-1][localX] == 1 :
+        game_world.add_object(uDoor, 1)
+    elif map_logic[localY+1][localX] == 1:
+        game_world.add_object(dDoor, 1)
+    elif map_logic[localY][localX-1] == 1:
+        game_world.add_object(lDoor, 1)
+    elif map_logic[localY][localX+1] == 1:
+        game_world.add_object(rDoor, 1)
+
+    slime = [Slime.slime() for i in range(SNum[localY-1][localX-1])]
+    golem = [Golem.Golem() for i in range(GNum[localY-1][localX-1])]
     game_world.add_object(map1, 0)
-    game_world.add_object(Door, 1)
+
     game_world.add_object(man, 2)
     game_world.add_objects(slime, 2)
     game_world.add_objects(golem, 2)
@@ -81,7 +100,7 @@ def resume():
     pass
 
 def handle_events():
-    global localx, localy, slime
+    global localX, localY, slime
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -96,22 +115,132 @@ def handle_events():
                 slime.remove(i)
                 game_world.remove_object(i)
             print(slime)
-            if slime == [] :
-                Door.set_open()
+
+
 
 
 def update():
     global slime, golem
-    global localY
+    global uDoor, lDoor, rDoor, dDoor
+    global localY, localX
 
+    if slime == []:
+        if map_logic[localY - 1][localX] == 1:
+            uDoor.set_open()
+        if map_logic[localY + 1][localX] == 1:
+            dDoor.set_open()
+        if map_logic[localY][localX - 1] == 1:
+            lDoor.set_open()
+        if map_logic[localY][localX + 1] == 1:
+            rDoor.set_open()
 
-    if collide(man, Door) and Door.get_open():
-        slime = [Slime.slime() for i in range(SNum[localY][localX])]
-        golem = [Golem.Golem() for i in range(GNum[localY][localX])]
-        localY -= 1
+    if collide(man, dDoor) and dDoor.get_open():
+        localY += 1
+        game_world.remove_object(dDoor)
+        man.y = WALL_U+20
+        for i in slime:
+            slime.remove(i)
+            game_world.remove_object(i)
+        for i in golem:
+            golem.remove(i)
+            game_world.remove_object(i)
+
+        slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+
         game_world.add_objects(slime, 2)
         game_world.add_objects(golem, 2)
-        man.y = WALL_D
+        if map_logic[localY - 1][localX] == 1:
+            game_world.add_object(uDoor, 1)
+            uDoor.set_close()
+        elif map_logic[localY + 1][localX] == 1:
+            game_world.add_object(dDoor, 1)
+        elif map_logic[localY][localX - 1] == 1:
+            game_world.add_object(lDoor, 1)
+        elif map_logic[localY][localX + 1] == 1:
+            game_world.add_object(rDoor, 1)
+
+    elif collide(man, uDoor) and uDoor.get_open():
+
+        localY -= 1
+        man.y = WALL_D-20
+        game_world.remove_object(uDoor)
+        for i in slime:
+            slime.remove(i)
+            game_world.remove_object(i)
+        for i in golem:
+            golem.remove(i)
+            game_world.remove_object(i)
+
+        slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+
+        game_world.add_objects(slime, 2)
+        game_world.add_objects(golem, 2)
+        if map_logic[localY - 1][localX] == 1:
+            game_world.add_object(uDoor, 1)
+        elif map_logic[localY + 1][localX] == 1:
+            game_world.add_object(dDoor, 1)
+            dDoor.set_close()
+        elif map_logic[localY][localX - 1] == 1:
+            game_world.add_object(lDoor, 1)
+        elif map_logic[localY][localX + 1] == 1:
+            game_world.add_object(rDoor, 1)
+
+    elif collide(man, lDoor) and lDoor.get_open():
+        lDoor.set_close()
+        localX -= 1
+        man.x = WALL_R
+        game_world.remove_object(lDoor)
+        for i in slime:
+            slime.remove(i)
+            game_world.remove_object(i)
+        for i in golem:
+            golem.remove(i)
+            game_world.remove_object(i)
+
+        slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+
+        game_world.add_objects(slime, 2)
+        game_world.add_objects(golem, 2)
+        if map_logic[localY - 1][localX] == 1:
+            game_world.add_object(uDoor, 1)
+        elif map_logic[localY + 1][localX] == 1:
+            game_world.add_object(dDoor, 1)
+        elif map_logic[localY][localX - 1] == 1:
+            game_world.add_object(lDoor, 1)
+        elif map_logic[localY][localX + 1] == 1:
+            game_world.add_object(rDoor, 1)
+
+
+    elif collide(man, rDoor) and rDoor.get_open():
+        rDoor.set_close()
+        localX += 1
+        man.y = WALL_L
+        game_world.remove_object(rDoor)
+        for i in slime:
+            slime.remove(i)
+            game_world.remove_object(i)
+        for i in golem:
+            golem.remove(i)
+            game_world.remove_object(i)
+
+        slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+
+        game_world.add_objects(slime, 2)
+        game_world.add_objects(golem, 2)
+        if map_logic[localY - 1][localX] == 1:
+            game_world.add_object(uDoor, 1)
+        elif map_logic[localY + 1][localX] == 1:
+            game_world.add_object(dDoor, 1)
+        elif map_logic[localY][localX - 1] == 1:
+            game_world.add_object(lDoor, 1)
+        elif map_logic[localY][localX + 1] == 1:
+            game_world.add_object(rDoor, 1)
+
+
 
     if golem != None:
         for Golem1 in golem:

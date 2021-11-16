@@ -23,8 +23,10 @@ class slime():
         self.p2 = [random.randint(150, 1130), random.randint(100, 635)]
         self.p3 = [random.randint(150, 1130), random.randint(100, 635)]
         self.p4 = [random.randint(150, 1130), random.randint(100, 635)]
+
         self.sizex, self.sizey = 50 ,50
         self.x, self.y = self.p2[0], self.p2[1]
+
         self.t = 0
 
     def get_bb(self):
@@ -32,6 +34,7 @@ class slime():
 
     def draw(self):
         self.image.clip_draw(int(self.frame)*50, self.direction*50, 50, 50, self.x, self.y)
+        draw_rectangle(*self.get_bb())
 
     def update(self):
         self.x = ((-self.t**3 + 2*self.t**2 - self.t)*self.p1[0] + (3*self.t**3 - 5*self.t**2 + 2)*self.p2[0] + (
