@@ -198,8 +198,18 @@ class Man():
         self.mp = 100
         self.damage = 5
 
+    def get_curstate(self):
+        if self.cur_state == IdleState:
+            return 'IdleState'
+        elif self.cur_state == RunState:
+            return 'RunState'
+        elif self.cur_state == RollState:
+            return 'RollState'
+        elif self.cur_state == AttackState:
+            return 'AttackState'
+
     def get_bb(self):
-        return self.x - 35, self.y - 35, self.x + 35, self.y + 35
+        return self.x - 30, self.y - 30, self.x + 30, self.y + 30
 
     def change_state(self, state):
         pass

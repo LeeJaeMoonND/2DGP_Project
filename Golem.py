@@ -106,22 +106,36 @@ class Golem():
         self.hp = 100
 
     def get_bb(self):
-        return self.x - (self.sizex//2-10), self.y - (self.sizey//2), self.x + (self.sizex//2-10), self.y + (self.sizey//2)
+        if self.cur_state==IdleState:
+            return self.x - (self.sizex//2-10), self.y - (self.sizey//2-20), self.x + (self.sizex//2-10), self.y + (self.sizey//2-20)
+        elif self.cur_state==AttackState:
+            return self.x - (self.sizex//2-10), self.y - 50 , self.x + (self.sizex//2-10), self.y + 50
+
+    def hited(self):
+        self.hp -= 10
+        if self.direction == 3:
+            self.x -= 5
+        elif self.direction == 2:
+            self.x += 5
+        elif self.direction == 0:
+            self.y -= 5
+        elif self.direction == 1:
+            self.y += 5
 
     def change_state(self, state):
         if state == 'contact' and self.cur_state == IdleState:
             self.add_event(CONTACT)
             if self.direction == 3:
-                self.x = self.Dx-self.sizex
+                self.x -= 5
 
             elif self.direction == 2:
-                self.x = self.Dx+self.sizex
+                self.x += 5
 
             elif self.direction == 0:
-                self.y = self.Dy - self.sizey
+                self.y -= 5
 
             elif self.direction == 1:
-                self.y = self.Dy + self.sizey
+                self.y += 5
 
             return ''
         elif state == 'contact' and self.cur_state == AttackState and int(self.frame) == 6:
