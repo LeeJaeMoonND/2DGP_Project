@@ -65,6 +65,9 @@ class AttackState:
                 Golem.direction = 1
 
         Golem.frame = (Golem.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
+        if int(Golem.frame) == 7 :
+            Golem.add_event(UNCONTACT)
+
 
 
     def draw(Golem):
@@ -90,6 +93,8 @@ class Golem():
         #주인공의 좌표 값을 받기 위한 변수
         self.Dx, self.Dy = self.x, self.y
         self.t = 0
+        self.font=load_font('ENCR10B.TTF',16)
+
 
         self.event_que = []
         self.cur_state = IdleState
@@ -98,8 +103,29 @@ class Golem():
         self.sizex = 100
         self.sizey = 80
 
+        self.hp = 100
+
+    def get_bb(self):
+        return self.x - (self.sizex//2-10), self.y - (self.sizey//2), self.x + (self.sizex//2-10), self.y + (self.sizey//2)
+
     def change_state(self, state):
-        pass
+        if state == 'contact' and self.cur_state == IdleState:
+            self.add_event(CONTACT)
+            if self.direction == 3:
+                self.x = self.Dx-self.sizex
+
+            elif self.direction == 2:
+                self.x = self.Dx+self.sizex
+
+            elif self.direction == 0:
+                self.y = self.Dy - self.sizey
+
+            elif self.direction == 1:
+                self.y = self.Dy + self.sizey
+
+            return ''
+        elif state == 'contact' and self.cur_state == AttackState and int(self.frame) == 6:
+            return 'G_Attack'
 
     def add_event(self, event):
         self.event_que.insert(0, event)
@@ -117,5 +143,8 @@ class Golem():
 
     def draw(self):
         self.cur_state.draw(self)
+        self.font.draw(self.x - 30, self.y + 65, 'HP: %d' % self.hp, (255, 255, 0))
+        draw_rectangle(*self.get_bb())
+
 
 

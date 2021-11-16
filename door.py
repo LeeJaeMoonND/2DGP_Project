@@ -10,45 +10,38 @@ WALL_U, WALL_D = 635, 85
 
 class OpenState:
     def enter(door, event):
-        door.time = 10
+        door.time = 100
 
     def exit(door, event):
         pass
 
     def do(door):
-        if door.time == 0:
-            door.add_event(CLOSE)
-            door.time = 10
-        door.time -= 1
-
-
-
-    def draw(door):
-        door.image = load_image('door/golem_basic_doors10.png')
-        door.image.draw(door.x, door.y, 142, 90)
-
-class CloseState:
-    def enter(door, event):
-        door.time = 10
-
-    def exit(door, event):
         pass
 
-    def do(door):
-        if door.time == 0:
-            door.add_event(OPEN)
-            door.time = 10
-        door.time -= 1
+
 
     def draw(door):
         door.image = load_image('door/golem_basic_doors1.png')
         door.image.draw(door.x, door.y, 142, 90)
 
+class CloseState:
+    def enter(door, event):
+        door.time = 100
+
+    def exit(door, event):
+        pass
+
+    def do(door):
+        pass
+
+    def draw(door):
+        door.image = load_image('door/golem_basic_doors10.png')
+        door.image.draw(door.x, door.y, 142, 90)
+
 
 next_state_table = {
-    OpenState: {CLOSE: CloseState},
-    CloseState: {OPEN: OpenState},
-
+    OpenState: {CLOSE: CloseState, OPEN:OpenState},
+    CloseState: {OPEN: OpenState,CLOSE: CloseState}
 }
 
 class door():
@@ -58,8 +51,21 @@ class door():
         self.time = 100
 
         self.event_que = []
-        self.cur_state = OpenState
+        self.cur_state = CloseState
         self.cur_state.enter(self, None)
+
+    def get_bb(self):
+        return self.x - 50, self.y-10, self.x + 50, self.y + 45
+
+    def set_open(self):
+        self.add_event(OPEN)
+
+    def get_open(self):
+        if self.cur_state == OpenState:
+            return True
+        else:
+            return False
+
 
     def change_state(self, state):
         pass
@@ -77,6 +83,7 @@ class door():
 
     def draw(self):
         self.cur_state.draw(self)
+        draw_rectangle(*self.get_bb())
 
     def handle_event(self, event):
        pass

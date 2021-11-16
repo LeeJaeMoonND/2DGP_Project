@@ -198,6 +198,9 @@ class Man():
         self.mp = 100
         self.damage = 5
 
+    def get_bb(self):
+        return self.x - 35, self.y - 35, self.x + 35, self.y + 35
+
     def change_state(self, state):
         pass
 
@@ -220,6 +223,8 @@ class Man():
         debug_print('Velocity: ' + str(self.velocityX) + ' Dir:' + str(self.dir))
         self.font.draw(self.x - 30, self.y + 65, 'HP: %d' %self.hp,(255, 255, 0))
         self.font.draw(self.x - 30, self.y + 50, 'MP: %d' %self.mp,(255, 255, 0))
+        draw_rectangle(*self.get_bb())
+
 
     def handle_event(self, event):
         if (event.type, event.key) in key_event_table:
