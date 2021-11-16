@@ -120,17 +120,15 @@ class RollState:
     def enter(Man, event):
         if event == A_DOWN:
             Man.frame = 0
-            Man.timer = 8
 
     def exit(boy, event):
         pass
 
     def do(Man):
         Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
-        Man.timer -= 1
         Man.x += Man.velocityX * game_framework.frame_time * 1.5
         Man.y += Man.velocityY * game_framework.frame_time * 1.5
-        if Man.timer == 0:
+        if int(Man.frame) == 7:
             Man.add_event(TIME_OUT)
         Man.x = clamp(150, Man.x, 1130)
         Man.y = clamp(100, Man.y, 635)
@@ -144,15 +142,13 @@ class AttackState:
     def enter(Man, event):
         if event == Z_DOWN:
             Man.frame = 0
-            Man.timer = 8
 
     def exit(Man, event):
         pass
 
     def do(Man):
-        Man.timer -= 1
         Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
-        if Man.timer == 0:
+        if int(Man.frame) == 7:
             Man.add_event(TIME_OUT)
 
     def draw(Man):

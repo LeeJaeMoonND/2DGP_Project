@@ -16,7 +16,6 @@ class OpenState:
         pass
 
     def do(door):
-        print(door.time)
         if door.time == 0:
             door.add_event(CLOSE)
             door.time = 10
@@ -36,7 +35,6 @@ class CloseState:
         pass
 
     def do(door):
-        print(door.time)
         if door.time == 0:
             door.add_event(OPEN)
             door.time = 10

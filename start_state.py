@@ -1,6 +1,6 @@
 from pico2d import *
 import game_framework
-import map1
+import main_state
 
 MAP_WIDTH, MAP_HEIGHT = 1276, 717
 
@@ -28,7 +28,7 @@ def handle_events():
             if (event.type, event.key) == (SDL_KEYDOWN, SDLK_ESCAPE):
                 game_framework.quit()
             elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-                game_framework.change_state(map1)
+                game_framework.change_state(main_state)
 
 
 def draw():
