@@ -1,15 +1,13 @@
 from pico2d import *
-import random
 
-import Slime
 
 
 MAP_WIDTH, MAP_HEIGHT = 1276, 717
 
 
-class Map:
+class Gameover:
     def __init__(self):
-        self.image = load_image('map/map1.png')
+        self.image = load_image('map/gameover.png')
 
     def update(self):
         pass

@@ -130,8 +130,8 @@ class RollState:
 
     def do(Man):
         Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
-        Man.x += Man.velocityX * game_framework.frame_time * 1.5
-        Man.y += Man.velocityY * game_framework.frame_time * 1.5
+        Man.x += Man.velocityX * game_framework.frame_time * 2
+        Man.y += Man.velocityY * game_framework.frame_time * 2
         if int(Man.frame) == 7:
             Man.add_event(TIME_OUT)
         Man.x = clamp(150, Man.x, 1130)
@@ -242,6 +242,8 @@ class Man():
 
     def change_state(self, state):
         pass
+
+
 
     def fire_ball(self):
         if self.mp >= 30:

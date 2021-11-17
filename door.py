@@ -93,7 +93,7 @@ class door():
     def set_open(self):
         self.add_event(OPEN)
     def set_close(self):
-        self.add_event(CLOSEs)
+        self.add_event(CLOSE)
 
     def get_open(self):
         if self.cur_state == OpenState:
