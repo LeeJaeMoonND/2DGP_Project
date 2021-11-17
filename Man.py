@@ -1,5 +1,8 @@
 from pico2d import *
 import game_framework
+import game_world
+from FireBall import FireBall
+
 import random
 
 PIXEL_PER_METER = (10.0 / 0.2) # 10 pixel 20 cm
@@ -15,8 +18,8 @@ FRAMES_PER_ACTION = 8
 
 MAP_WIDTH, MAP_HEIGHT = 1175, 585
 
-RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN, A_UP, Z_DOWN, Z_UP, TIME_OUT = range(13)
-error = ['RIGHT_DOWN', 'LEFT_DOWN', 'UP_DOWN', 'DOWN_DOWN', 'RIGHT_UP', 'LEFT_UP', 'UP_UP', 'DOWN_UP', 'A_DOWN', 'A_UP', 'Z_DOWN', 'Z_UP', 'TIME_OUT']
+RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN, A_UP, Z_DOWN, Z_UP, TIME_OUT, SPACE_DOWN = range(14)
+error = ['RIGHT_DOWN', 'LEFT_DOWN', 'UP_DOWN', 'DOWN_DOWN', 'RIGHT_UP', 'LEFT_UP', 'UP_UP', 'DOWN_UP', 'A_DOWN', 'A_UP', 'Z_DOWN', 'Z_UP', 'TIME_OUT', 'SPACE_DOWN']
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
@@ -30,7 +33,8 @@ key_event_table = {
     (SDL_KEYDOWN, SDLK_a): A_DOWN,
     (SDL_KEYUP, SDLK_a): A_UP,
     (SDL_KEYDOWN, SDLK_z): Z_DOWN,
-    (SDL_KEYUP, SDLK_z): Z_UP
+    (SDL_KEYUP, SDLK_z): Z_UP,
+    (SDL_KEYUP, SDLK_SPACE): SPACE_DOWN
 }
 
 
@@ -142,6 +146,26 @@ class AttackState:
     def enter(Man, event):
         if event == Z_DOWN:
             Man.frame = 0
+        if event == SPACE_DOWN:
+            Man.fire_ball()
+
+    def exit(Man, event):
+        pass
+
+    def do(Man):
+        Man.frame = (Man.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
+        if int(Man.frame) == 7:
+            Man.add_event(TIME_OUT)
+
+    def draw(Man):
+        Man.image = load_image('will/will_attack.png')
+        Man.image.clip_draw(int(Man.frame) * 70, Man.direction * 110, 70, 110, int(Man.x), int(Man.y))
+
+class MagicState:
+    def enter(Man, event):
+        if event == SPACE_DOWN:
+            Man.frame = 0
+            Man.fire_ball()
 
     def exit(Man, event):
         pass
@@ -158,19 +182,23 @@ class AttackState:
 next_state_table = {
     IdleState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,
-    A_DOWN:RollState, A_UP:IdleState, Z_DOWN: AttackState, Z_UP: IdleState},
+    A_DOWN:RollState, A_UP:IdleState, Z_DOWN: AttackState, Z_UP: IdleState,SPACE_DOWN:MagicState},
 
     RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState, DOWN_UP: IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN: RunState, DOWN_DOWN: RunState,
-    A_DOWN: RollState, A_UP: RunState, Z_DOWN: AttackState, Z_UP: IdleState,TIME_OUT: RunState},
+    A_DOWN: RollState, A_UP: RunState, Z_DOWN: AttackState, Z_UP: IdleState,TIME_OUT: RunState,SPACE_DOWN:MagicState},
 
     RollState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,TIME_OUT:RunState,
-    A_DOWN:RollState, A_UP: RollState, Z_DOWN:RollState, Z_UP:RollState},
+    A_DOWN:RollState, A_UP: RollState, Z_DOWN:RollState, Z_UP:RollState,SPACE_DOWN:MagicState},
 
     AttackState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP: IdleState,DOWN_UP: IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN:RunState, DOWN_DOWN:RunState, TIME_OUT: RunState,
-    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState}
+    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState,SPACE_DOWN:MagicState},
+
+    MagicState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP: IdleState,DOWN_UP: IdleState,
+    RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN:RunState, DOWN_DOWN:RunState, TIME_OUT: RunState,
+    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState,SPACE_DOWN:MagicState}
 }
 
 
@@ -214,10 +242,18 @@ class Man():
     def change_state(self, state):
         pass
 
+    def fire_ball(self):
+        if self.mp >= 10:
+            fireball = FireBall(self.x, self.y, self.direction)
+            game_world.add_object(fireball, 2)
+            self.mp -= 10
+
+
     def add_event(self, event):
         self.event_que.insert(0, event)
 
     def update(self):
+        self.mp += 0.02
         self.cur_state.do(self)
         if len(self.event_que) > 0:
             event = self.event_que.pop()

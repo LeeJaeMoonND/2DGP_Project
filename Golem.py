@@ -111,8 +111,8 @@ class Golem():
         elif self.cur_state==AttackState:
             return self.x - (self.sizex//2-10), self.y - 50 , self.x + (self.sizex//2-10), self.y + 50
 
-    def hited(self):
-        self.hp -= 10
+    def hited(self, damage):
+        self.hp -= damage
         if self.direction == 3:
             self.x -= 5
         elif self.direction == 2:
