@@ -111,16 +111,16 @@ class Golem():
         elif self.cur_state==AttackState:
             return self.x - (self.sizex//2-10), self.y - 50 , self.x + (self.sizex//2-10), self.y + 50
 
-    def hited(self, damage):
+    def hited(self,knockback, damage):
         self.hp -= damage
         if self.direction == 3:
-            self.x -= 5
+            self.x -= knockback
         elif self.direction == 2:
-            self.x += 5
+            self.x += knockback
         elif self.direction == 0:
-            self.y -= 5
+            self.y -= knockback
         elif self.direction == 1:
-            self.y += 5
+            self.y += knockback
 
     def change_state(self, state):
         if state == 'contact' and self.cur_state == IdleState:

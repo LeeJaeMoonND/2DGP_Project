@@ -18,8 +18,8 @@ FRAMES_PER_ACTION = 8
 
 MAP_WIDTH, MAP_HEIGHT = 1175, 585
 
-RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN, A_UP, Z_DOWN, Z_UP, TIME_OUT, SPACE_DOWN = range(14)
-error = ['RIGHT_DOWN', 'LEFT_DOWN', 'UP_DOWN', 'DOWN_DOWN', 'RIGHT_UP', 'LEFT_UP', 'UP_UP', 'DOWN_UP', 'A_DOWN', 'A_UP', 'Z_DOWN', 'Z_UP', 'TIME_OUT', 'SPACE_DOWN']
+RIGHT_DOWN, LEFT_DOWN, UP_DOWN, DOWN_DOWN, RIGHT_UP, LEFT_UP, UP_UP, DOWN_UP, A_DOWN, A_UP, Z_DOWN, Z_UP, TIME_OUT, X_DOWN = range(14)
+error = ['RIGHT_DOWN', 'LEFT_DOWN', 'UP_DOWN', 'DOWN_DOWN', 'RIGHT_UP', 'LEFT_UP', 'UP_UP', 'DOWN_UP', 'A_DOWN', 'A_UP', 'Z_DOWN', 'Z_UP', 'TIME_OUT', 'X_DOWN']
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
@@ -34,7 +34,7 @@ key_event_table = {
     (SDL_KEYUP, SDLK_a): A_UP,
     (SDL_KEYDOWN, SDLK_z): Z_DOWN,
     (SDL_KEYUP, SDLK_z): Z_UP,
-    (SDL_KEYUP, SDLK_SPACE): SPACE_DOWN
+    (SDL_KEYUP, SDLK_x): X_DOWN
 }
 
 
@@ -146,7 +146,7 @@ class AttackState:
     def enter(Man, event):
         if event == Z_DOWN:
             Man.frame = 0
-        if event == SPACE_DOWN:
+        if event == X_DOWN:
             Man.fire_ball()
 
     def exit(Man, event):
@@ -163,7 +163,7 @@ class AttackState:
 
 class MagicState:
     def enter(Man, event):
-        if event == SPACE_DOWN:
+        if event == X_DOWN:
             Man.frame = 0
             Man.fire_ball()
 
@@ -182,23 +182,23 @@ class MagicState:
 next_state_table = {
     IdleState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,
-    A_DOWN:RollState, A_UP:IdleState, Z_DOWN: AttackState, Z_UP: IdleState,SPACE_DOWN:MagicState},
+    A_DOWN:RollState, A_UP:IdleState, Z_DOWN: AttackState, Z_UP: IdleState,X_DOWN:MagicState},
 
     RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState, DOWN_UP: IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN: RunState, DOWN_DOWN: RunState,
-    A_DOWN: RollState, A_UP: RunState, Z_DOWN: AttackState, Z_UP: IdleState,TIME_OUT: RunState,SPACE_DOWN:MagicState},
+    A_DOWN: RollState, A_UP: RunState, Z_DOWN: AttackState, Z_UP: IdleState,TIME_OUT: RunState,X_DOWN:MagicState},
 
     RollState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP:IdleState,DOWN_UP:IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState,UP_DOWN:RunState,DOWN_DOWN:RunState,TIME_OUT:RunState,
-    A_DOWN:RollState, A_UP: RollState, Z_DOWN:RollState, Z_UP:RollState,SPACE_DOWN:MagicState},
+    A_DOWN:RollState, A_UP: RollState, Z_DOWN:RollState, Z_UP:RollState,X_DOWN:MagicState},
 
     AttackState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP: IdleState,DOWN_UP: IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN:RunState, DOWN_DOWN:RunState, TIME_OUT: RunState,
-    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState,SPACE_DOWN:MagicState},
+    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState,X_DOWN:MagicState},
 
     MagicState:{RIGHT_UP: IdleState, LEFT_UP: IdleState, UP_UP: IdleState,DOWN_UP: IdleState,
     RIGHT_DOWN: RunState, LEFT_DOWN: RunState, UP_DOWN:RunState, DOWN_DOWN:RunState, TIME_OUT: RunState,
-    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState,SPACE_DOWN:MagicState}
+    A_DOWN: RollState, A_UP: RollState, Z_UP: AttackState, TIME_OUT: IdleState,X_DOWN:MagicState}
 }
 
 
@@ -225,6 +225,7 @@ class Man():
         self.hp = 100
         self.mp = 100
         self.damage = 5
+        self.fireball, self.FSq = [], 0
 
     def get_curstate(self):
         if self.cur_state == IdleState:
@@ -243,10 +244,11 @@ class Man():
         pass
 
     def fire_ball(self):
-        if self.mp >= 10:
-            fireball = FireBall(self.x, self.y, self.direction)
-            game_world.add_object(fireball, 2)
-            self.mp -= 10
+        if self.mp >= 30:
+            self.fireball.append(FireBall(self.x, self.y, self.direction))
+            game_world.add_object(self.fireball[self.FSq], 2)
+            self.FSq += 1
+            self.mp -= 30
 
 
     def add_event(self, event):
@@ -254,6 +256,8 @@ class Man():
 
     def update(self):
         self.mp += 0.02
+        if self.mp > 100 :
+            self.mp = 100
         self.cur_state.do(self)
         if len(self.event_que) > 0:
             event = self.event_que.pop()
