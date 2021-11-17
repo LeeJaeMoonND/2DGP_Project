@@ -73,11 +73,11 @@ def enter():
 
     if map_logic[localY-1][localX] == 1 :
         game_world.add_object(uDoor, 1)
-    elif map_logic[localY+1][localX] == 1:
+    if map_logic[localY+1][localX] == 1:
         game_world.add_object(dDoor, 1)
-    elif map_logic[localY][localX-1] == 1:
+    if map_logic[localY][localX-1] == 1:
         game_world.add_object(lDoor, 1)
-    elif map_logic[localY][localX+1] == 1:
+    if map_logic[localY][localX+1] == 1:
         game_world.add_object(rDoor, 1)
 
     slime = [Slime.slime() for i in range(SNum[localY-1][localX-1])]
@@ -153,14 +153,14 @@ def update():
         if map_logic[localY - 1][localX] == 1:
             game_world.add_object(uDoor, 1)
             uDoor.set_close()
-        elif map_logic[localY + 1][localX] == 1:
+        if map_logic[localY + 1][localX] == 1:
             game_world.add_object(dDoor, 1)
-        elif map_logic[localY][localX - 1] == 1:
+        if map_logic[localY][localX - 1] == 1:
             game_world.add_object(lDoor, 1)
-        elif map_logic[localY][localX + 1] == 1:
+        if map_logic[localY][localX + 1] == 1:
             game_world.add_object(rDoor, 1)
 
-    elif collide(man, uDoor) and uDoor.get_open():
+    if collide(man, uDoor) and uDoor.get_open():
 
         localY -= 1
         man.y = WALL_D-20
@@ -179,15 +179,15 @@ def update():
         game_world.add_objects(golem, 2)
         if map_logic[localY - 1][localX] == 1:
             game_world.add_object(uDoor, 1)
-        elif map_logic[localY + 1][localX] == 1:
+        if map_logic[localY + 1][localX] == 1:
             game_world.add_object(dDoor, 1)
             dDoor.set_close()
-        elif map_logic[localY][localX - 1] == 1:
+        if map_logic[localY][localX - 1] == 1:
             game_world.add_object(lDoor, 1)
-        elif map_logic[localY][localX + 1] == 1:
+        if map_logic[localY][localX + 1] == 1:
             game_world.add_object(rDoor, 1)
 
-    elif collide(man, lDoor) and lDoor.get_open():
+    if collide(man, lDoor) and lDoor.get_open():
         lDoor.set_close()
         localX -= 1
         man.x = WALL_R
@@ -214,7 +214,7 @@ def update():
             game_world.add_object(rDoor, 1)
 
 
-    elif collide(man, rDoor) and rDoor.get_open():
+    if collide(man, rDoor) and rDoor.get_open():
         rDoor.set_close()
         localX += 1
         man.y = WALL_L
