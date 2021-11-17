@@ -166,7 +166,7 @@ def update():
         if map_logic[localY][localX + 1] == 1:
             Door[3].set_open()
 
-    if collide(man, Door[0]) and Door[0].get_open():
+    if collide(man, Door[0]) and Door[0].get_open() and map_logic[localY - 1][localX] == 1:
         localY -= 1
         man.y = WALL_D + 50
         for i in slime:
@@ -190,7 +190,7 @@ def update():
 
         draw_dooor(Door)
 
-    if collide(man, Door[1]) and Door[1].get_open():
+    if collide(man, Door[1]) and Door[1].get_open() and map_logic[localY + 1][localX] == 1:
 
         localY += 1
         man.y = WALL_U -50
@@ -215,7 +215,7 @@ def update():
 
         draw_dooor(Door)
 
-    if collide(man, Door[2]) and Door[2].get_open():
+    if collide(man, Door[2]) and Door[2].get_open() and map_logic[localY][localX - 1] == 1:
 
         localX -= 1
         man.x = WALL_R -50
@@ -226,7 +226,7 @@ def update():
         for i in turret:
             turret.remove(i)
 
-        turret = [Turret.Turret() for i in range(TNum[localY - 1][localX - 1])]
+        turret = [Turret.Turret() for i in range(TNum[localX - 1][localY])]
         slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
         golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
 
@@ -241,11 +241,10 @@ def update():
         draw_dooor(Door)
 
 
-    if collide(man, Door[3]) and Door[3].get_open():
-
+    if collide(man, Door[3]) and Door[3].get_open() and map_logic[localY][localX + 1] == 1:
         localX += 1
         man.y = WALL_L+50
-        game_world.remove_object(Door[3])
+
         for i in slime:
             slime.remove(i)
         for i in golem:
@@ -267,13 +266,33 @@ def update():
 
         draw_dooor(Door)
 
+    if turret != None:
+        for turret1 in turret:
+            turret1.Dx, turret1.Dy = man.x, man.y
+            if turret1.hp <= 0:
+                TNum[localY - 1][localX - 1] -= 1
+                turret.remove(turret1)
+                game_world.remove_object(turret1)
 
+            for turretball in turret1.turretball:
+                if collide(turretball, man):
+                    man.hp -= 5
+                    turret1.turretball.remove(turretball)
+                    game_world.remove_object(turretball)
+                    turret1.TSq -= 1
+
+            if collide(man, turret1):
+                if man.get_curstate() == 'AttackState':
+                    turret1.hited(2, man.damage)
+            for fire1 in man.fireball:
+                if collide(fire1, turret1):
+                    turret1.hited(1, fire1.damage)
 
     if golem != None:
         for Golem1 in golem:
             Golem1.Dx, Golem1.Dy = man.x, man.y
     for Golem1 in golem :
-        if Golem1.hp < 0:
+        if Golem1.hp <= 0:
             GNum[localY-1][localX-1] -= 1
             golem.remove(Golem1)
             game_world.remove_object(Golem1)

@@ -1,12 +1,14 @@
 from pico2d import *
 import game_framework
 import random
+import game_world
+import TurretBall
 
 MAP_WIDTH, MAP_HEIGHT = 1270, 717
 
 TIME_OUT = range(2)
 
-TIME_PER_ACTION = 0.5
+TIME_PER_ACTION = 2
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 
@@ -18,6 +20,7 @@ class IdleState:
         pass
 
     def do(Turret):
+        Turret.timer -= random.randint(1, 5)
         if abs(Turret.Dx - Turret.x) > abs(Turret.Dy - Turret.y):
             if Turret.Dx > Turret.x:
                 Turret.direction = 3
@@ -31,8 +34,12 @@ class IdleState:
 
         Turret.frame = (Turret.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
 
-        Turret.x = clamp(150, Turret.x, 1130)
-        Turret.y = clamp(100, Turret.y, 635)
+        if Turret.timer <= 0:
+            Turret.timer = 100
+            Turret.add_event(TIME_OUT)
+
+        Turret.x = clamp(200, Turret.x, 1100)
+        Turret.y = clamp(150, Turret.y, 600)
 
     def draw(Turret):
         Turret.sizex = 60
@@ -48,6 +55,7 @@ class AttackState:
         pass
 
     def do(Turret):
+        Turret.timer -= random.randint(1, 5)
         if abs(Turret.Dx - Turret.x) > abs(Turret.Dy - Turret.y):
             if Turret.Dx > Turret.x:
                 Turret.direction = 3
@@ -61,9 +69,14 @@ class AttackState:
 
         Turret.frame = (Turret.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
 
-        if int(Turret.frame) == 7 :
+        if Turret.timer <= 0:
+            if Turret.timer % 2 == 0 :
+                Turret.turret_ball()
+            Turret.timer = 200
             Turret.add_event(TIME_OUT)
 
+        Turret.x = clamp(200, Turret.x, 1100)
+        Turret.y = clamp(150, Turret.y, 600)
 
 
     def draw(Turret):
@@ -90,7 +103,7 @@ class Turret():
         self.Dx, self.Dy = self.x, self.y
         self.t = 0
         self.font=load_font('ENCR10B.TTF',16)
-
+        self.timer = 10
 
         self.event_que = []
         self.cur_state = IdleState
@@ -98,25 +111,30 @@ class Turret():
 
         self.sizex = 100
         self.sizey = 80
+        self.turretball = []
+        self.TSq = 0
 
         self.hp = 100
 
     def get_bb(self):
-        if self.cur_state==IdleState:
-            return self.x - (self.sizex//2-10), self.y - (self.sizey//2-20), self.x + (self.sizex//2-10), self.y + (self.sizey//2-20)
-        elif self.cur_state==AttackState:
-            return self.x - (self.sizex//2-10), self.y - 50 , self.x + (self.sizex//2-10), self.y + 50
+        return self.x - (self.sizex//2), self.y - (self.sizey//2), self.x + (self.sizex//2), self.y + (self.sizey//2)
 
-    def hited(self, damage):
+
+    def hited(self, knockback, damage):
         self.hp -= damage
         if self.direction == 3:
-            self.x -= 5
+            self.x -= knockback
         elif self.direction == 2:
-            self.x += 5
+            self.x += knockback
         elif self.direction == 0:
-            self.y -= 5
+            self.y -= knockback
         elif self.direction == 1:
-            self.y += 5
+            self.y += knockback
+
+    def turret_ball(self):
+        self.turretball.append(TurretBall.TurretBall(self.x, self.y, self.direction))
+        game_world.add_object(self.turretball[self.TSq], 2)
+        self.TSq += 1
 
     def change_state(self, state):
         pass
@@ -125,6 +143,7 @@ class Turret():
         self.event_que.insert(0, event)
 
     def update(self):
+
         self.cur_state.do(self)
         if len(self.event_que) > 0:
             event = self.event_que.pop()
