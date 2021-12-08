@@ -3,6 +3,7 @@ import random
 
 import game_world
 import game_framework
+import math
 
 import gameover
 import Map
@@ -119,7 +120,7 @@ def enter():
         RLocy.append(random.randint(85, 635))
     rock = [Rock.Rock(RLocx[i], RLocy[i]) for i in range(RNum[localY-1][localX-1])]
     slime = [Slime.slime() for i in range(SNum[localY-1][localX-1])]
-    golem = [Golem.Golem() for i in range(GNum[localY-1][localX-1])]
+    golem = [Golem.Golem(i) for i in range(GNum[localY-1][localX-1])]
     turret = [Turret.Turret() for i in range(TNum[localY-1][localX-1])]
 
     game_world.add_object(map, 0)
@@ -204,7 +205,7 @@ def update():
         rock = [Rock.Rock(RLocx[i], RLocy[i]) for i in range(RNum[localY - 1][localX - 1])]
         turret = [Turret.Turret() for i in range(TNum[localY - 1][localX - 1])]
         slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
-        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem(i) for i in range(GNum[localY - 1][localX - 1])]
 
         game_world.clear()
 
@@ -238,7 +239,7 @@ def update():
         rock = [Rock.Rock(RLocx[i], RLocy[i]) for i in range(RNum[localY - 1][localX - 1])]
         turret = [Turret.Turret() for i in range(TNum[localY - 1][localX - 1])]
         slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
-        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem(i) for i in range(GNum[localY - 1][localX - 1])]
 
         game_world.clear()
 
@@ -272,7 +273,7 @@ def update():
         rock = [Rock.Rock(RLocx[i], RLocy[i]) for i in range(RNum[localY - 1][localX - 1])]
         turret = [Turret.Turret() for i in range(TNum[localX - 1][localY])]
         slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
-        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem(i) for i in range(GNum[localY - 1][localX - 1])]
 
         game_world.clear()
 
@@ -308,7 +309,7 @@ def update():
         rock = [Rock.Rock(RLocx[i], RLocy[i]) for i in range(RNum[localY - 1][localX - 1])]
         turret = [Turret.Turret() for i in range(TNum[localY - 1][localX - 1])]
         slime = [Slime.slime() for i in range(SNum[localY - 1][localX - 1])]
-        golem = [Golem.Golem() for i in range(GNum[localY - 1][localX - 1])]
+        golem = [Golem.Golem(i) for i in range(GNum[localY - 1][localX - 1])]
 
         game_world.clear()
 
@@ -347,6 +348,21 @@ def update():
     if golem != None:
         for Golem1 in golem:
             Golem1.Dx, Golem1.Dy = man.x, man.y
+    for Slimes in slime :
+        if Slimes.hp <= 0:
+            SNum[localY-1][localX-1] -= 1
+            slime.remove(Slimes)
+            game_world.remove_object(Slimes)
+
+        if collide(man, Slimes):
+            if man.get_curstate() == 'AttackState':
+                Slimes.hited(5, man.damage)
+            else:
+                man.hp -= 1
+        for fire1 in man.fireball:
+            if collide(fire1, Slimes):
+                Slimes.hited(1, fire1.damage)
+
     for Golem1 in golem :
         if Golem1.hp <= 0:
             GNum[localY-1][localX-1] -= 1
@@ -377,44 +393,21 @@ def update():
 
                     elif Slime1.direction == 1:
                         Slime1.y = Golem1.y - Slime1.sizey
-        '''
-        오류
-        for Golem2 in golem :
-            if Golem1.x == Golem2.x:
+
+
+        '''for Golem2 in golem :
+            if Golem1.num == Golem2.num:
                 pass
             else:
-                if Golem2.direction == 3:
-                    Golem2.x -= 5
-                elif Golem2.direction == 2:
-                    Golem2.x += 5
-                elif Golem2.direction == 0:
-                    Golem2.y -= 5
-                elif Golem2.direction== 1:
-                    Golem2.y += 5
+                Golem2.x -= (Golem2.x - Golem1.x)
+                Golem2.y -= (Golem2.y - Golem1.y) 
         '''
-    '''for rocks in rock:
+    for rocks in rock:
         rocks.dir = 0
         if collide(rocks, man):
             if man.get_curstate() != 'RollState':
-                if man.direction == 1 :
-                    man.velocityY = 0
-        rocks.dir = 1
-        if collide(rocks, man):
-            if man.get_curstate() != 'RollState':
-                if man.direction == 0:
-                    man.velocityY = 0
-        rocks.dir = 2
-        if collide(rocks, man):
-            if man.get_curstate() != 'RollState':
-                if man.direction == 3:
-                    man.velocityX = 0
-        rocks.dir = 3
-        if collide(rocks, man):
-            if man.get_curstate() != 'RollState':
-                if man.direction == 2:
-                    man.velocityY = 0
-    '''
-
+                man.x -= (rocks.x - man.x)//2
+                man.y -= (rocks.y - man.y)// 2
 
     for game_object in game_world.all_objects():
         game_object.update()

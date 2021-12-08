@@ -209,6 +209,8 @@ class Man():
         # 움직임
         self.dir = 0
         self.direction = 0
+        self.sizex = 70
+        self.sizey = 110
 
         # 좌표, 방향
         self.velocityX = 0

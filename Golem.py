@@ -83,11 +83,12 @@ next_state_table = {
 }
 
 class Golem():
-    def __init__(self):
+    def __init__(self,num):
         self.image = load_image('Monster/Golem/golem-attack1.png')
 
         self.frame = 0
         self.direction = 3
+        self.num = num
 
         self.x, self.y = random.randint(150, 1130), random.randint(100, 635)
         #주인공의 좌표 값을 받기 위한 변수
